@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3 style="text-align:center;">My Bookings</h3>
+
+<table border="1" style="width:95%; margin:auto; text-align:center;">
+    
+    <tr>
+        <th>Patient Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Hospital</th>
+        <th>Bed Type</th>
+        <th>Status</th>
+    </tr>
+
+    {% for booking in bookings %}
+    <tr>
+        <td>{{ booking.patient_name }}</td>
+        <td>{{ booking.email }}</td>
+        <td>{{ booking.phone }}</td>
+        <td>{{ booking.hospital.hospital_name }}</td>
+        <td>{{ booking.bed_type }}</td>
+
+        <td>
+    {% if booking.status.lower() == "pending" %}
+        <span style="background:orange; color:white; padding:4px 8px; border-radius:5px;">Pending</span>
+
+    {% elif booking.status.lower() == "confirmed" %}
+        <span style="background:green; color:white; padding:4px 8px; border-radius:5px;">Confirmed</span>
+
+    {% elif booking.status.lower() == "cancelled" %}
+        <span style="background:red; color:white; padding:4px 8px; border-radius:5px;">Cancelled</span>
+
+    {% elif booking.status.lower() == "discharged" %}
+        <span style="background:purple; color:white; padding:4px 8px; border-radius:5px;">Discharged</span>
+    {% endif %}
+        </td>
+
+
+    </tr>
+    {% endfor %}
+
+</table>
+
+{% endblock %}

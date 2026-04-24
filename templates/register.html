@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .register-box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 320px;
+            text-align: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px;
+            border: none;
+            width: 100%;
+        }
+
+        a {
+            text-decoration: none;
+            color: blue;
+        }
+
+        .password-box {
+            position: relative;
+        }
+
+        .password-box input {
+            padding-right: 40px;
+        }
+
+        .toggle-eye {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="register-box">
+
+    <h2>{{ role.capitalize() }} Register</h2>
+
+    <form method="POST">
+
+        <input type="hidden" name="role" value="{{ role }}">
+
+        <input type="text" name="name" placeholder="Enter Name" required>
+        <input type="email" name="email" placeholder="Enter Email" required>
+        <input type="text" name="phone" placeholder="Enter Phone" required>
+
+        <!-- PASSWORD -->
+        <div class="password-box">
+            <input type="password" id="password" name="password" placeholder="Enter Password" required>
+
+            <span class="toggle-eye" onclick="togglePassword()">
+                <!-- OPEN -->
+                <svg id="eyeOpen" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="black" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+
+                <!-- CLOSED -->
+                <svg id="eyeClose" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="black" stroke-width="2" viewBox="0 0 24 24" style="display:none;">
+                    <path d="M1 1l22 22"/>
+                </svg>
+            </span>
+        </div>
+
+        <button type="submit">Register</button>
+
+    </form>
+
+    <br>
+
+    <p>
+        Already registered?
+        <a href="/login?role={{ role }}">Login</a>
+    </p>
+
+</div>
+
+<script>
+function togglePassword() {
+    const input = document.getElementById("password");
+    const openEye = document.getElementById("eyeOpen");
+    const closeEye = document.getElementById("eyeClose");
+
+    if (input.type === "password") {
+        input.type = "text";
+        openEye.style.display = "none";
+        closeEye.style.display = "inline";
+    } else {
+        input.type = "password";
+        openEye.style.display = "inline";
+        closeEye.style.display = "none";
+    }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,27 @@
+<h1>MedTrack Dashboard</h1>
+
+{% if session["role"] == "admin" %}
+<a href="/add_hospital">Add Hospital</a>
+<br><br>
+{% endif %}
+
+<a href="/hospitals">View Hospitals</a>
+<br><br>
+
+{% if session["role"] == "admin" or session["role"] == "staff" %}
+<a href="/bookings">View Bookings</a>
+<br><br>
+{% endif %}
+
+<a href="/logout">Logout</a>
+
+{% if session["role"] == "admin" %}
+
+<h2>System Statistics</h2>
+
+<p>Total Hospitals: {{ total_hospitals }}</p>
+<p>Total Bookings: {{ total_bookings }}</p>
+<p>ICU Beds Available: {{ icu_total }}</p>
+<p>Oxygen Beds Available: {{ oxygen_total }}</p>
+<p>Normal Beds Available: {{ normal_total }}</p>
+{% endif %}

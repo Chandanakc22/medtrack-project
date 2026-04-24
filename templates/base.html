@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MedTrack</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+        }
+
+        /* HEADER */
+        .header {
+            background: #007bff;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background: #333;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 14px;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        /* PAGE CONTENT */
+        .container {
+            padding: 20px;
+        }
+
+        /* TABLE DESIGN */
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        th {
+            background: #007bff;
+            color: white;
+            padding: 12px;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+
+        tr:hover {
+            background: #f1f1f1;
+        }
+
+        /* BUTTONS */
+        .btn {
+            padding: 6px 10px;
+            border-radius: 5px;
+            color: white;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .btn-book { background: green; }
+        .btn-modify { background: orange; }
+        .btn-discharge { background: purple; }
+        .btn-cancel { background: red; }
+
+        /* HEADINGS */
+        h2 {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <div class="header">
+        🏥 MedTrack - Hospital Bed Booking System
+    </div>
+
+    <!-- NAVBAR -->
+    {% if session.get('role') == 'admin' %}
+<div class="navbar">
+    <a href="/">Home</a>
+    <a href="/admin_dashboard">Dashboard</a>
+    <a href="/logout">Logout</a>
+</div>
+
+{% elif session.get('role') == 'staff' %}
+<div class="navbar">
+    <a href="/staff_dashboard">Dashboard</a>
+    <a href="/logout">Logout</a>
+</div>
+
+{% elif session.get('role') == 'patient' %}
+<div class="navbar">
+    <a href="/patient_dashboard">Dashboard</a>
+    <a href="/logout">Logout</a>
+</div>
+{% endif %}
+    <!-- CONTENT -->
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+</body>
+</html>

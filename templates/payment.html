@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f5f7fa;
+            text-align: center;
+        }
+
+        .container {
+            width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px gray;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+        }
+
+        .method-box {
+            text-align: left;
+            margin: 10px 0;
+        }
+
+        .pay-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: green;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        input, select {
+            width: 90%;
+            padding: 8px;
+            margin: 5px 0;
+        }
+    </style>
+
+    <script>
+        function showFields(method) {
+            document.getElementById("upi").style.display = "none";
+            document.getElementById("card").style.display = "none";
+            document.getElementById("netbanking").style.display = "none";
+
+            document.getElementById(method).style.display = "block";
+        }
+    </script>
+</head>
+
+<body>
+
+{% extends "base.html" %}    
+{% block content %}
+<h2 style = "text-align:center;">Payment Page</h2>
+
+<div class="container">
+    <h2>Complete Payment</h2>
+    <p><b>Amount: ₹{{ fee }}</b></p>
+
+    <form method="POST">
+
+        <div class="method-box">
+            <input type="radio" name="payment_method" value="upi" onclick="showFields('upi')" required> UPI
+        </div>
+
+        <div class="method-box">
+            <input type="radio" name="payment_method" value="card" onclick="showFields('card')"> Card
+        </div>
+
+        <div class="method-box">
+            <input type="radio" name="payment_method" value="netbanking" onclick="showFields('netbanking')"> Net Banking
+        </div>
+
+        <!-- UPI -->
+        <div id="upi" class="hidden">
+            <p>Scan QR to Pay:</p>
+
+            <img src = "{{url_for('static',filename = 'qr.png')}}" width = "200"><br><br>
+            
+            <p>Enter UPI ID:</p>
+            <input type="text" placeholder="example@upi">
+        </div>
+
+        <!-- Card -->
+        <div id="card" class="hidden">
+            <p>Card Details:</p>
+            <input type="text" placeholder="Card Number">
+            <input type="text" placeholder="Expiry Date">
+            <input type="text" placeholder="CVV">
+        </div>
+
+        <!-- Net Banking -->
+        <div id="netbanking" class="hidden">
+            <p>Select Bank:</p>
+            <select>
+                <option>SBI</option>
+                <option>HDFC</option>
+                <option>ICICI</option>
+                <option>Axis Bank</option>
+            </select>
+        </div>
+
+        <button class="pay-btn" type="submit">Pay Now</button>
+
+    </form>
+</div>
+
+{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment Success</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f0fff4;
+            text-align: center;
+        }
+
+        .box {
+            margin: 100px auto;
+            width: 400px;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px gray;
+        }
+
+        .success {
+            color: green;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: blue;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="box">
+    <div class="success">✅ Payment Successful</div>
+
+    <p><b>Booking Details:</b></p>
+
+    <p>Hospital: {{ booking.hospital.hospital_name }}</p>
+    <p>Bed Type: {{ booking.bed_type }}</p>
+    <p>Status: {{ booking.status }}</p>
+
+    <a href="/my_bookings" class="btn">Go to My Bookings</a>
+</div>
+
+</body>
+</html>

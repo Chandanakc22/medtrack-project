@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 style="text-align:center;">
+    Book Bed - {{ hospital.hospital_name }}
+</h2>
+
+<form method="POST" style="width:400px; margin:auto;">
+
+    <!-- ✅ IMPORTANT (for modify feature) -->
+    <input type="hidden" name="booking_id" value="{{ request.args.get('booking_id') }}">
+
+    <!-- Patient Name -->
+    <label>Patient Name:</label><br>
+    <input type="text" name="patient_name" required style="width:100%; padding:8px;"><br><br>
+
+    <!-- Email -->
+    <label>Email:</label><br>
+    <input type="email" name="email" required style="width:100%; padding:8px;"><br><br>
+
+    <!-- Phone -->
+    <label>Phone:</label><br>
+    <input type="text" name="phone" required style="width:100%; padding:8px;"><br><br>
+
+    <!-- Bed Type -->
+    <label>Bed Type:</label><br>
+    <select name="bed_type" style="width:100%; padding:8px;">
+        <option value="ICU">ICU</option>
+        <option value="Oxygen">Oxygen</option>
+        <option value="Normal">Normal</option>
+    </select><br><br>
+
+    <!-- Emergency Level -->
+    <label>Emergency Level:</label><br>
+    <select name="priority" style="width:100%; padding:8px;">
+        <option value="Critical">Critical</option>
+        <option value="Moderate">Moderate</option>
+        <option value="Normal">Normal</option>
+    </select><br><br>
+
+    <!-- Submit -->
+    <button type="submit"
+        style="width:100%; padding:10px; background:green; color:white; border:none; border-radius:5px;">
+        Book Bed
+    </button>
+
+</form>
+
+{% endblock %}

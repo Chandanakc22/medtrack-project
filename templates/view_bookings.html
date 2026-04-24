@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 style="text-align:center;">All Bookings</h2>
+
+<table border="1" style="width:95%; margin:auto; text-align:center;">
+
+    <tr>
+        <th>Patient Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Hospital</th>
+        <th>Bed Type</th>
+
+        <!-- Role-based column name -->
+        {% if session.get("role") in ["admin", "staff"] %}
+            <th>Action</th>
+        {% else %}
+            <th>Modify</th>
+        {% endif %}
+
+        <th>Priority</th>
+        <th>Status</th>
+    </tr>
+
+    {% for booking in bookings %}
+    <tr>
+        <td>{{ booking.patient_name }}</td>
+        <td>{{ booking.email }}</td>
+        <td>{{ booking.phone }}</td>
+        <td>{{ booking.hospital.hospital_name }}</td>
+        <td>{{ booking.bed_type }}</td>
+
+        <!-- ACTION / MODIFY COLUMN -->
+        <td>
+
+            <!-- Change Bed (for everyone) -->
+            <a href="/modify/{{ booking.id }}">Change Bed</a>
+
+            <!-- Discharge (ONLY admin & staff AND valid status) -->
+            {% if session.get("role") in ["admin", "staff"] 
+                  and booking.status.lower() not in ["cancelled", "discharged"] %}
+                |
+                <a href="/discharge/{{ booking.id }}" style="color:purple;">
+                    Discharge
+                </a>
+            {% endif %}
+
+        </td>
+
+        <td>{{ booking.priority }}</td>
+
+        <!-- STATUS COLUMN -->
+        <td>
+            {% if booking.status.lower() == "pending" %}
+                <span style="color:orange;">Pending</span>
+
+            {% elif booking.status.lower() == "confirmed" %}
+                <span style="color:green;">Confirmed</span>
+
+            {% elif booking.status.lower() == "cancelled" %}
+                <span style="color:red;">Cancelled</span>
+
+            {% elif booking.status.lower() == "discharged" %}
+                <span style="color:purple;">Discharged</span>
+
+            {% else %}
+                {{ booking.status }}
+            {% endif %}
+        </td>
+
+    </tr>
+    {% endfor %}
+
+</table>
+
+{% endblock %}

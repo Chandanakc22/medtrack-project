@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MedTrack</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            text-align: center;
+            color: white;
+        }
+
+        h1 {
+            margin-top: 50px;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            margin-top: 50px;
+            gap: 30px;
+        }
+
+        .card {
+            background: white;
+            color: black;
+            padding: 30px;
+            border-radius: 10px;
+            width: 200px;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+        }
+
+        .card a {
+            text-decoration: none;
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 15px;
+        }
+
+        .card a:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Welcome to MedTrack</h1>
+<p>Smart Healthcare Bed Booking System</p>
+
+<div class="container">
+
+    <div class="card">
+        <h3>Patient</h3>
+        <a href="/login?role=patient">Login</a>
+    </div>
+
+    <div class="card">
+        <h3>Staff</h3>
+        <a href="/login?role=staff">Login</a>
+    </div>
+
+    <div class="card">
+        <h3>Admin</h3>
+        <a href="/login?role=admin">Login</a>
+    </div>
+
+
+</div>
+
+</body>
+</html>
