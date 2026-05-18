@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 style="text-align:center; margin-top:20px;">
+    Pending Staff Requests
+</h2>
+
+<table border="1"
+       style="
+       width:95%;
+       margin:auto;
+       margin-top:20px;
+       border-collapse:collapse;
+       text-align:center;
+">
+
+    <tr style="background:#007bff; color:white;">
+
+        <th>Name</th>
+
+        <th>Email</th>
+
+        <th>Phone</th>
+
+        <th>Assign Hospital</th>
+
+        <th>Action</th>
+
+    </tr>
+
+    {% for staff in staffs %}
+
+    <tr>
+
+        <td>{{ staff.name }}</td>
+
+        <td>{{ staff.email }}</td>
+
+        <td>{{ staff.phone }}</td>
+
+        <td>
+
+            <form action="/approve_staff/{{ staff.id }}"
+                  method="POST">
+
+                <select name="hospital_id" required>
+
+                    {% for hospital in hospitals %}
+
+                    <option value="{{ hospital.id }}">
+
+                        {{ hospital.hospital_name }}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+        </td>
+
+        <td>
+
+                <button type="submit"
+                        style="
+                        background:green;
+                        color:white;
+                        border:none;
+                        padding:8px 15px;
+                        border-radius:5px;
+                        cursor:pointer;
+                ">
+
+                    Approve
+
+                </button>
+
+            </form>
+
+        </td>
+
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+{% endblock %}

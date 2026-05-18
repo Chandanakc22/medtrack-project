@@ -2,49 +2,143 @@
 
 {% block content %}
 
-<h2 style="text-align:center;">
-    Book Bed - {{ hospital.hospital_name }}
-</h2>
+<style>
 
-<form method="POST" style="width:400px; margin:auto;">
+.booking-container{
+    width: 420px;
+    margin: auto;
+    margin-top: 30px;
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+}
 
-    <!-- ✅ IMPORTANT (for modify feature) -->
-    <input type="hidden" name="booking_id" value="{{ request.args.get('booking_id') }}">
+.booking-container h2{
+    text-align: center;
+    margin-bottom: 20px;
+}
 
-    <!-- Patient Name -->
-    <label>Patient Name:</label><br>
-    <input type="text" name="patient_name" required style="width:100%; padding:8px;"><br><br>
+.booking-container label{
+    display: block;
+    margin-top: 12px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
 
-    <!-- Email -->
-    <label>Email:</label><br>
-    <input type="email" name="email" required style="width:100%; padding:8px;"><br><br>
+.booking-container input,
+.booking-container select{
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
 
-    <!-- Phone -->
-    <label>Phone:</label><br>
-    <input type="text" name="phone" required style="width:100%; padding:8px;"><br><br>
+.booking-container button{
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    background: green;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
 
-    <!-- Bed Type -->
-    <label>Bed Type:</label><br>
-    <select name="bed_type" style="width:100%; padding:8px;">
-        <option value="ICU">ICU</option>
-        <option value="Oxygen">Oxygen</option>
-        <option value="Normal">Normal</option>
-    </select><br><br>
+.booking-container button:hover{
+    background: darkgreen;
+}
 
-    <!-- Emergency Level -->
-    <label>Emergency Level:</label><br>
-    <select name="priority" style="width:100%; padding:8px;">
-        <option value="Critical">Critical</option>
-        <option value="Moderate">Moderate</option>
-        <option value="Normal">Normal</option>
-    </select><br><br>
+</style>
 
-    <!-- Submit -->
-    <button type="submit"
-        style="width:100%; padding:10px; background:green; color:white; border:none; border-radius:5px;">
-        Book Bed
-    </button>
+<div class="booking-container">
 
-</form>
+    <h2>
+        Book Bed - {{ hospital.hospital_name }}
+    </h2>
+
+    <form method="POST">
+
+        <!-- Hidden Booking ID -->
+        <input type="hidden"
+               name="booking_id"
+               value="{{ request.args.get('booking_id') }}">
+
+        <!-- Patient Name -->
+        <label>Patient Name</label>
+        <input type="text"
+               name="patient_name"
+               required>
+
+        <!-- Guardian Name -->
+        <label>Guardian Name</label>
+        <input type="text"
+               name="guardian_name"
+               required>
+
+        <!-- Relationship -->
+        <label>Relationship with Patient</label>
+
+        <select name="relationship" required>
+
+            <option value="">Select</option>
+
+            <option>Father</option>
+            <option>Mother</option>
+            <option>Brother</option>
+            <option>Sister</option>
+            <option>Husband</option>
+            <option>Wife</option>
+            <option>Son</option>
+            <option>Daughter</option>
+            <option>Friend</option>
+            <option>Other</option>
+
+        </select>
+
+        <!-- Guardian Email -->
+        <label>Guardian Email</label>
+        <input type="email"
+               name="email"
+               required>
+
+        <!-- Guardian Phone -->
+        <label>Guardian Phone</label>
+        <input type="text"
+               name="guardian_phone"
+               required>
+
+        <!-- Bed Type -->
+        <label>Bed Type</label>
+
+        <select name="bed_type">
+
+            <option value="ICU">ICU</option>
+            <option value="Oxygen">Oxygen</option>
+            <option value="Normal">Normal</option>
+
+        </select>
+
+        <!-- Emergency Level -->
+        <label>Emergency Level</label>
+
+        <select name="priority">
+
+            <option value="Critical">Critical</option>
+            <option value="Moderate">Moderate</option>
+            <option value="Normal">Normal</option>
+
+        </select>
+
+        <!-- Submit Button -->
+        <button type="submit">
+            Book Bed
+        </button>
+
+    </form>
+
+</div>
 
 {% endblock %}

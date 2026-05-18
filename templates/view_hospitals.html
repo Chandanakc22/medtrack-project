@@ -2,61 +2,124 @@
 
 {% block content %}
 
-<h3 style="text-align:center; margin-top:20px;">Hospitals List</h3>
+<h3 style="text-align:center; margin-top:20px;">
+    Hospitals List
+</h3>
 
 <!-- Search -->
 <div style="text-align:center; margin-bottom:15px;">
+
     <form method="GET">
-        <input type="text" name="search" placeholder="Search hospital or city">
-        <button type="submit">Search</button>
+
+        <input
+            type="text"
+            name="search"
+            placeholder="Search hospital or city"
+        >
+
+        <button type="submit">
+            Search
+        </button>
+
     </form>
+
 </div>
 
-<table border="1" style="width:95%; margin:auto; text-align:center; border-collapse:collapse;">
+<table
+    border="1"
+    style="
+        width:95%;
+        margin:auto;
+        text-align:center;
+        border-collapse:collapse;
+    "
+>
 
     <tr style="background-color:#007bff; color:white;">
+
         <th>Hospital</th>
         <th>City</th>
         <th>Address</th>
         <th>ICU Beds</th>
         <th>Oxygen Beds</th>
         <th>Normal Beds</th>
+        <th>Available Staff</th>
         <th>Map</th>
 
-        <!-- ✅ Show only for patient -->
         {% if session.get("role") == "patient" %}
             <th>Action</th>
         {% endif %}
+
     </tr>
 
     {% for hospital in hospitals %}
+
     <tr>
+
         <td>{{ hospital.hospital_name }}</td>
+
         <td>{{ hospital.city }}</td>
+
         <td>{{ hospital.address }}</td>
+
         <td>{{ hospital.icu_beds }}</td>
+
         <td>{{ hospital.oxygen_beds }}</td>
+
         <td>{{ hospital.normal_beds }}</td>
 
-        <!-- Map -->
+        <!-- STAFF COLUMN -->
         <td>
-            <a href="https://www.google.com/maps/search/{{ hospital.hospital_name }}"
-               target="_blank">
-               View
-            </a>
+
+            {% for staff in staff_members %}
+
+                {% if staff.assigned_hospital_id == hospital.id %}
+
+                    {{ staff.name }}
+                    <br>
+
+                {% endif %}
+
+            {% endfor %}
+
         </td>
 
-        <!-- ✅ Book button only for patient -->
-        {% if session.get("role") == "patient" %}
+        <!-- MAP -->
         <td>
-            <a href="/book/{{ hospital.id }}" 
-               style="background:green; color:white; padding:5px 10px; text-decoration:none; border-radius:5px;">
-               Book
+
+            <a
+                href="https://www.google.com/maps/search/{{ hospital.hospital_name }}"
+                target="_blank"
+            >
+                View
             </a>
+
         </td>
+
+        <!-- BOOK BUTTON -->
+        {% if session.get("role") == "patient" %}
+
+        <td>
+
+            <a
+                href="/book/{{ hospital.id }}"
+                style="
+                    background:green;
+                    color:white;
+                    padding:5px 10px;
+                    text-decoration:none;
+                    border-radius:5px;
+                "
+            >
+                Book
+            </a>
+
+        </td>
+
         {% endif %}
 
     </tr>
+
     {% endfor %}
 
 </table>

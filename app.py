@@ -6,7 +6,13 @@ from flask import Flask,render_template, request, redirect,session,url_for
 from models import db,Hospital,Booking,User
 from sqlalchemy import func
 from werkzeug.security import  generate_password_hash , check_password_hash
+from flask import send_file
 
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.pagesizes import letter
+
+import io
 
 app = Flask(__name__)
 app.secret_key = "medtrack_secret"
@@ -94,8 +100,9 @@ def view_hospitals():
         ).all()
     else:
         hospitals = Hospital.query.order_by(Hospital.id).all()
-
-    return render_template("view_hospitals.html", hospitals=hospitals)
+    staff_members = User.query.filter_by(role="staff", approval_status="approved").all()
+    
+    return render_template("view_hospitals.html", hospitals=hospitals, staff_members=staff_members)
 
 # BOOK BED
 @app.route("/book/<int:hospital_id>", methods=["GET", "POST"])
@@ -112,71 +119,119 @@ def book_bed(hospital_id):
     if request.method == "POST":
 
         name = request.form["patient_name"]
-        email = request.form["email"]
-        phone = request.form["phone"]
+
+        # Guardian details
+        guardian_name = request.form["guardian_name"]
+
+        relationship = request.form["relationship"]
+
+        guardian_email = request.form["email"]
+
+        guardian_phone = request.form["guardian_phone"]
+
         bed_type = request.form["bed_type"]
+
         priority = request.form["priority"]
 
         # =========================================================
-        # ✅ STEP 1: Handle OLD booking (when modifying)
+        # STEP 1: Handle OLD booking (when modifying)
         # =========================================================
+
         if booking_id and booking_id != "None":
+
             old_booking = Booking.query.get(int(booking_id))
 
             if old_booking:
-                old_hospital = Hospital.query.get(old_booking.hospital_id)
+
+                old_hospital = Hospital.query.get(
+                    old_booking.hospital_id
+                )
 
                 if old_booking.bed_type == "ICU":
+
                     old_hospital.icu_beds += 1
+
                 elif old_booking.bed_type == "Oxygen":
+
                     old_hospital.oxygen_beds += 1
+
                 elif old_booking.bed_type == "Normal":
+
                     old_hospital.normal_beds += 1
 
                 db.session.delete(old_booking)
 
         # =========================================================
-        # ✅ STEP 2: CHECK BED AVAILABILITY (NEW FEATURE)
+        # STEP 2: CHECK BED AVAILABILITY
         # =========================================================
+
         if bed_type == "ICU":
+
             if hospital.icu_beds > 0:
+
                 hospital.icu_beds -= 1
+
             else:
-                return render_template("ICU bed not available")
+
+                return "ICU bed not available"
 
         elif bed_type == "Oxygen":
+
             if hospital.oxygen_beds > 0:
+
                 hospital.oxygen_beds -= 1
+
             else:
-                return render_template("Oxygen bed not availabe")
+
+                return "Oxygen bed not available"
 
         elif bed_type == "Normal":
+
             if hospital.normal_beds > 0:
+
                 hospital.normal_beds -= 1
+
             else:
-                return render_template("Normal bed not available")
+
+                return "Normal bed not available"
 
         # =========================================================
-        # ✅ STEP 3: CREATE NEW BOOKING
+        # STEP 3: CREATE NEW BOOKING
         # =========================================================
+
         new_booking = Booking(
+
             patient_name=name,
-            email=email,
-            phone=phone,
+
+            email=guardian_email,
+
+            phone=guardian_phone,
+
+            guardian_name=guardian_name,
+
+            relationship=relationship,
+
+            guardian_phone=guardian_phone,
+
             hospital_id=hospital.id,
+
             bed_type=bed_type,
+
             priority=priority,
+
             status="Confirmed"
         )
 
         db.session.add(new_booking)
+
         db.session.commit()
 
         return redirect(f"/payment/{new_booking.id}")
 
-    return render_template("book.html", hospital=hospital)
-
-
+    return render_template(
+        "book.html",
+        hospital=hospital
+    )
 # VIEW BOOKINGS
 @app.route("/view_bookings")
 def view_bookings():
@@ -210,7 +265,9 @@ def cancel_booking(booking_id):
         hospital.normal_beds += 1
 
     booking.status = "Cancelled"
-
+    
+    if booking.payment_method:
+        booking.refund_status = "Pending"
     db.session.commit()
 
     return redirect("/my_bookings")
@@ -291,21 +348,32 @@ def register():
 
         # Check existing user
         if User.query.filter_by(email=email).first():
-            return "User already exists!"
+            return render_template("register.html", error="User already exists!", role=role)
 
         # Password validation (hidden rules)
-        if not re.match(r'^(?=.[a-z])(?=.[A-Z])(?=.*\d).{8,}$', password):
-            return "Invalid password format!"
+        if not re.match(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$',password):
 
+            error = "Invalid password format!!"
+
+            return render_template(
+                "register.html",
+                 error=error,
+                 role=role
+    )
         # Hash password
         hashed_password = generate_password_hash(password)
+
+        approval_status = "approved" 
+        if role == "staff":
+            approval_status = "pending"
 
         new_user = User(
             name=name,
             email=email,
             phone=phone,
             password=hashed_password,
-            role=role
+            role=role,
+            approval_status=approval_status
         )
 
         db.session.add(new_user)
@@ -327,6 +395,9 @@ def login():
         user = User.query.filter_by(email=email).first()
 
         if user and check_password_hash(user.password, password):
+            if user.role == "staff" and user.approval_status != "approved":
+                error = "Waiting for admin approval"
+                return render_template("login.html", error=error, role=role)
 
             # 🔒 IMPORTANT: Role match check
             if user.role != role:
@@ -361,21 +432,56 @@ def payment(booking_id):
     # Calculate fee
     if booking.bed_type == "ICU":
         fee = 1000
+
     elif booking.bed_type == "Oxygen":
         fee = 700
+
     else:
         fee = 500
 
+    error = None
+
     if request.method == "POST":
+
         method = request.form.get("payment_method")
 
-        # Just simulate payment success
+        # UPI VALIDATION
+        if method == "UPI":
+
+            upi_id = request.form.get("upi_id")
+
+            if not upi_id or "@" not in upi_id:
+                error = "Enter valid UPI ID"
+
+                return render_template(
+                    "payment.html",
+                    booking=booking,
+                    fee=fee,
+                    error=error
+                )
+
+        # SAVE PAYMENT DETAILS
+        booking.payment_method = method
+
+        booking.payment_amount = fee
+
+        booking.transaction_id = "TXN" + str(booking.id) + "2026"
+
         booking.status = "Confirmed"
+
         db.session.commit()
 
-        return render_template("payment_success.html", booking=booking)
+        return render_template(
+            "payment_success.html",
+            booking=booking
+        )
 
-    return render_template("payment.html", booking=booking, fee=fee)
+    return render_template(
+        "payment.html",
+        booking=booking,
+        fee=fee,
+        error=error
+    )
 
 @app.route("/forgot_password")
 def forgot_password():
@@ -383,28 +489,51 @@ def forgot_password():
 
 @app.route("/admin_dashboard")
 def admin_dashboard():
+
     total = Booking.query.count()
+
     pending = Booking.query.filter_by(status="Pending").count()
+
     confirmed = Booking.query.filter_by(status="Confirmed").count()
+
     cancelled = Booking.query.filter_by(status="Cancelled").count()
+
     discharged = Booking.query.filter_by(status="Discharged").count()
 
+    pending_staff = User.query.filter_by(role="staff", approval_status="pending").all()
+    hospitals = Hospital.query.all()
     return render_template(
         "admin_dashboard.html",
         total=total,
         pending=pending,
         confirmed=confirmed,
         cancelled=cancelled,
-        discharged=discharged
+        discharged=discharged,
+        pending_staff=pending_staff,
+        hospitals=hospitals
     )
 
 @app.route("/staff_dashboard")
 def staff_dashboard():
 
-    if session.get("role") != "staff":
-        return "Access Denied"
+    if "user" not in session:
+        return redirect("/")
 
-    return render_template("staff_dashboard.html")
+    # Get logged in staff
+    user = User.query.filter_by(
+        email=session["user"]
+    ).first()
+
+    # Get assigned hospital
+    hospital = Hospital.query.get(
+        user.assigned_hospital_id
+    )
+
+    return render_template(
+        "staff_dashboard.html",
+        user=user,
+        hospital=hospital
+    )
 
 @app.route("/patient_dashboard")
 def patient_dashboard():
@@ -413,6 +542,182 @@ def patient_dashboard():
         return "Access Denied"
 
     return render_template("patient_dashboard.html")
+
+@app.route("/pending_staff")
+def pending_staff():
+
+    # ✅ only admin can access
+    if session.get("role") != "admin":
+        return redirect("/")
+
+    # get pending staff
+    staff_requests = User.query.filter_by(
+        role="staff",
+        approval_status="pending"
+    ).all()
+
+    hospitals = Hospital.query.all()
+
+    return render_template(
+        "pending_staff.html",
+        staff_requests=staff_requests,
+        hospitals=hospitals
+    )
+
+@app.route("/approve_staff/<int:user_id>", methods=["POST"])
+def approve_staff(user_id):
+
+    if session.get("role") != "admin":
+        return redirect("/")
+
+    staff = User.query.get_or_404(user_id)
+
+    hospital_id = request.form.get("hospital_id")
+
+    hospital = Hospital.query.get(hospital_id)
+
+    # approve
+    staff.approval_status = "approved"
+
+    # assign selected hospital
+    staff.assigned_hospital_id = hospital_id
+
+    # notification
+    if hospital:
+        staff.notification = (
+            f"You are approved and assigned to "
+            f"{hospital.hospital_name}"
+        )
+
+    db.session.commit()
+
+    return redirect("/admin_dashboard")
+
+@app.route("/reject_staff/<int:user_id>")
+def reject_staff(user_id):
+
+    # only admin
+    if session.get("role") != "admin":
+        return redirect("/")
+
+    # get user
+    staff = User.query.get_or_404(user_id)
+
+    # delete user
+    db.session.delete(staff)
+
+    # save changes
+    db.session.commit()
+
+    return redirect("/admin_dashboard")
+
+@app.route("/assigned_staff")
+def assigned_staff():
+
+    # only admin
+    if session.get("role") != "admin":
+        return redirect("/")
+
+    # approved staff only
+    staff_list = User.query.filter_by(
+        role="staff",
+        approval_status="approved"
+    ).all()
+
+    hospitals = Hospital.query.all()
+
+    return render_template(
+        "assigned_staff.html",
+        staff_list=staff_list,
+        hospitals=hospitals
+    )
+
+@app.route("/download_receipt/<int:booking_id>")
+def download_receipt(booking_id):
+
+    booking = Booking.query.get_or_404(booking_id)
+
+    buffer = io.BytesIO()
+
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter
+    )
+
+    styles = getSampleStyleSheet()
+
+    content = []
+
+    content.append(
+        Paragraph(
+            "MedTrack Hospital Bed Booking Receipt",
+            styles['Title']
+        )
+    )
+
+    content.append(Spacer(1, 20))
+
+    content.append(
+        Paragraph(
+            f"<b>Patient Name:</b> {booking.patient_name}",
+            styles['BodyText']
+        )
+    )
+
+    content.append(
+        Paragraph(
+            f"<b>Hospital Name:</b> {booking.hospital.hospital_name}",
+            styles['BodyText']
+        )
+    )
+
+    content.append(
+        Paragraph(
+            f"<b>Guardian Name:</b> {booking.guardian_name}",
+            styles['BodyText']
+        )
+    )
+
+    content.append(
+        Paragraph(
+            f"<b>Guardian Phone:</b> {booking.guardian_phone}",
+            styles['BodyText']
+        )
+    )
+
+    content.append(
+        Paragraph(
+            f"<b>Hospital Name:</b> {booking.hospital.hospital_name}",
+            styles['BodyText']
+        )
+    )
+
+    content.append(
+        Paragraph(
+            f"<b>Bed Type:</b> {booking.bed_type}",
+            styles['BodyText']
+        )
+    )
+
+    content.append(
+        Paragraph(
+            f"<b>Status:</b> {booking.status}",
+            styles['BodyText']
+        )
+    )
+
+    doc.build(content)
+
+    buffer.seek(0)
+
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name="receipt.pdf",
+        mimetype="application/pdf"
+    )
+
+
 
 @app.route("/my_bookings")
 def my_bookings():

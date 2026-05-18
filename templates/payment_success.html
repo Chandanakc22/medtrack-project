@@ -1,53 +1,90 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Payment Success</title>
-    <style>
-        body {
-            font-family: Arial;
-            background: #f0fff4;
-            text-align: center;
-        }
+{% extends "base.html" %}
 
-        .box {
-            margin: 100px auto;
-            width: 400px;
-            padding: 30px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px gray;
-        }
+{% block content %}
 
-        .success {
-            color: green;
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
+<div style="
+    width:500px;
+    margin:40px auto;
+    background:white;
+    padding:30px;
+    border-radius:10px;
+    box-shadow:0px 0px 10px gray;
+">
 
-        .btn {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background: blue;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-    </style>
-</head>
+    <h2 style="color:green; text-align:center;">
+        Payment Successful ✅
+    </h2>
 
-<body>
+    <hr>
 
-<div class="box">
-    <div class="success">✅ Payment Successful</div>
+    <p>
+        <b>Transaction ID:</b>
+        {{ booking.transaction_id }}
+    </p>
 
-    <p><b>Booking Details:</b></p>
+    <p>
+        <b>Payment Method:</b>
+        {{ booking.payment_method }}
+    </p>
 
-    <p>Hospital: {{ booking.hospital.hospital_name }}</p>
-    <p>Bed Type: {{ booking.bed_type }}</p>
-    <p>Status: {{ booking.status }}</p>
+    <p>
+        <b>Amount Paid:</b>
+        ₹{{ booking.payment_amount }}
+    </p>
 
-    <a href="/my_bookings" class="btn">Go to My Bookings</a>
+    <p>
+        <b>Patient Name:</b>
+        {{ booking.patient_name }}
+    </p>
+
+    <p>
+        <b>Hospital:</b>
+        {{ booking.hospital.hospital_name }}
+    </p>
+
+    <p>
+        <b>Bed Type:</b>
+        {{ booking.bed_type }}
+    </p>
+
+    <p>
+        <b>Status:</b>
+        {{ booking.status }}
+    </p>
+
+    <br>
+
+    <div style="text-align:center;">
+
+        <a href="/patient_dashboard"
+           style="
+                background:#007bff;
+                color:white;
+                padding:10px 20px;
+                text-decoration:none;
+                border-radius:5px;
+           ">
+           Go To Dashboard
+        </a>
+        
+        <br><br>
+
+        <a href="/download_receipt/{{ booking.id }}"
+        style="
+                background:green;
+                color:white;
+                padding:10px 20px;
+                text-decoration:none;
+                border-radius:5px;
+                display:inline-block;
+                margin-top:15px;
+        ">
+
+            Download Receipt PDF
+
+        </a>
+    </div>
+
 </div>
 
-</body>
-</html>
+{% endblock %}
